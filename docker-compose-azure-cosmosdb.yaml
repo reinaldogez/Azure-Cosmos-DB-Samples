@@ -1,5 +1,13 @@
 version: '3.8' # Do not upgrade to 3.x yet, unless you plan to use swarm/docker stack: https://github.com/docker/compose/issues/4513
 
+networks:
+  default:
+    external: false
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.16.238.0/24"
+
 services:
 
   cosmosdb:
@@ -23,5 +31,8 @@ services:
         - '10255:10255'
         - '10256:10256'
         - '10350:10350'
+    networks:
+      default:
+        ipv4_address: 172.16.238.246        
     volumes:
         - '${hostDirectory}:C:\CosmosDB.Emulator\bind-mount'

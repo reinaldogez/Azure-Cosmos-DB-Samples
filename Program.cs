@@ -16,3 +16,5 @@ var serviceProvider = services.BuildServiceProvider();
 CosmosDBManager cosmosDBManager = new CosmosDBManager(configuration);
 
 await cosmosDBManager.CheckConnection();
+await cosmosDBManager.CreateDatabase();
+//cosmosDBManager.MongoDBConnection();
