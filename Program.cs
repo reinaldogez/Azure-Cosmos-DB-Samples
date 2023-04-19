@@ -17,7 +17,6 @@ configuration.Bind("CosmosDbSettings", cosmosDbSettings);
 
 // Register CosmosClient as a singleton instance
 services.AddSingleton(s => new CosmosClient(cosmosDbSettings.EndpointUri, cosmosDbSettings.PrimaryKey));
-// CosmosDBManager cosmosDBManager = new CosmosDBManager(configuration);
 services.AddScoped<CosmosDBManager>();
 services.AddSingleton<CosmosDbSettings>(cosmosDbSettings);
 
@@ -25,4 +24,6 @@ var serviceProvider = services.BuildServiceProvider();
 
 var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
 await cosmosDBManager.CheckConnection();
-await cosmosDBManager.CreateDatabase();
+//await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 800);
+await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
+
