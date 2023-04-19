@@ -7,19 +7,13 @@ using Microsoft.Extensions.Configuration;
 
 public class CosmosDBManager
 {
-    private readonly string _primaryKey;
-    private readonly string _endpointUri;
-    private readonly string _cosmosDatabaseId;
-    private readonly string _mongoDBConnectionString;
+    private readonly CosmosClient _cosmosClient;
+    private readonly CosmosDbSettings _cosmosDbSettings;
 
-
-    public CosmosDBManager(IConfiguration configuration)
+    public CosmosDBManager(CosmosClient cosmosClient, CosmosDbSettings cosmosDbSettings)
     {
-        _primaryKey = configuration.GetValue<string>("PrimaryKey");
-        _endpointUri = configuration.GetValue<string>("EndpointUri");
-        _cosmosDatabaseId = configuration.GetValue<string>("CosmosDatabaseId");
-        _mongoDBConnectionString = configuration.GetValue<string>("MongoDBConnectionString");
-
+        _cosmosClient = cosmosClient;
+        _cosmosDbSettings = cosmosDbSettings;
     }
     public async Task<bool> CheckConnection()
     {
@@ -28,37 +22,31 @@ public class CosmosDBManager
 
         Console.WriteLine("Testing Connection...\n");
 
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
+        try
         {
-            try
-            {
-                AccountProperties accountProperties = await client.ReadAccountAsync();
-                // await client.CreateDatabaseIfNotExistsAsync(_cosmosDatabaseId);
-                ListProperties(accountProperties);
-                Console.WriteLine("Connection to Cosmos Emulator is Ok.");
-                return true;
-            }
-            catch (CosmosException ce)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.BackgroundColor = ConsoleColor.Red;
-
-                Exception baseException = ce.GetBaseException();
-                Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: {0}", e);
-            }
-            finally
-            {
-                Console.ResetColor();
-                client.Dispose();
-            }
-            return false;
+            AccountProperties accountProperties = await _cosmosClient.ReadAccountAsync();
+            ListProperties(accountProperties);
+            Console.WriteLine("Connection to Cosmos Emulator is Ok.");
+            return true;
         }
+        catch (CosmosException ce)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Exception baseException = ce.GetBaseException();
+            Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
+        }
+        catch (Exception e)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: {0}", e);
+        }
+        finally
+        {
+            Console.ResetColor();
+        }
+        return false;
     }
 
     public async Task<bool> CreateDatabase()
@@ -68,38 +56,34 @@ public class CosmosDBManager
 
         Console.WriteLine("Creating database...\n");
 
-        using (CosmosClient client = new CosmosClient(_endpointUri, _primaryKey))
+        try
         {
-            try
-            {
-                DatabaseResponse databaseResponse = await client.CreateDatabaseIfNotExistsAsync(_cosmosDatabaseId);
-                if (databaseResponse.StatusCode == HttpStatusCode.Accepted)
-                    Console.WriteLine("Database created");
-                else
-                    Console.WriteLine($"DatabaseResponse status code {databaseResponse.StatusCode}");
-                return true;
-            }
-            catch (CosmosException ce)
-            {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.BackgroundColor = ConsoleColor.Red;
-
-                Exception baseException = ce.GetBaseException();
-                Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.BackgroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: {0}", e);
-            }
-            finally
-            {
-                Console.ResetColor();
-                client.Dispose();
-            }
-            return false;
+            DatabaseResponse databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(_cosmosDbSettings.DatabaseName);
+            if (databaseResponse.StatusCode == HttpStatusCode.Accepted)
+                Console.WriteLine("Database created");
+            else
+                Console.WriteLine($"DatabaseResponse status code {databaseResponse.StatusCode}");
+            return true;
         }
+        catch (CosmosException ce)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.BackgroundColor = ConsoleColor.Red;
+
+            Exception baseException = ce.GetBaseException();
+            Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
+        }
+        catch (Exception e)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.BackgroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: {0}", e);
+        }
+        finally
+        {
+            Console.ResetColor();
+        }
+        return false;
     }
 
     public static void ListProperties(object obj)

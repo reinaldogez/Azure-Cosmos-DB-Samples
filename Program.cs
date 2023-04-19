@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using AzureCosmosDBSamples;
+using Microsoft.Azure.Cosmos;
 
 var builder = new ConfigurationBuilder()
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -11,10 +12,17 @@ var configuration = builder.Build();
 var services = new ServiceCollection();
 services.AddSingleton<IConfiguration>(configuration);
 
+var cosmosDbSettings = new CosmosDbSettings();
+configuration.Bind("CosmosDbSettings", cosmosDbSettings);
+
+// Register CosmosClient as a singleton instance
+services.AddSingleton(s => new CosmosClient(cosmosDbSettings.EndpointUri, cosmosDbSettings.PrimaryKey));
+// CosmosDBManager cosmosDBManager = new CosmosDBManager(configuration);
+services.AddScoped<CosmosDBManager>();
+services.AddSingleton<CosmosDbSettings>(cosmosDbSettings);
+
 var serviceProvider = services.BuildServiceProvider();
 
-CosmosDBManager cosmosDBManager = new CosmosDBManager(configuration);
-
+var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
 await cosmosDBManager.CheckConnection();
 await cosmosDBManager.CreateDatabase();
-//cosmosDBManager.MongoDBConnection();
