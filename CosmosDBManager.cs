@@ -164,10 +164,47 @@ public class CosmosDBManager
         return false;
     }
 
+    public async Task<bool> CreateContainersList(List<ContainerInfo> listContainersInfo, string databaseName)
+    {
+        try
+        {
+            foreach (var containerInfo in listContainersInfo)
+            {
+                IndexingPolicy indexingPolicy = new()
+                {
+                    IndexingMode = ParseIndexingMode(containerInfo.IndexingMode)
+                };
+
+                if (containerInfo.IncludedPaths != null)
+                {
+                    foreach (string includedPath in containerInfo.IncludedPaths)
+                    {
+                        indexingPolicy.IncludedPaths.Add(new IncludedPath { Path = includedPath });
+                    }
+                }
+
+                if (containerInfo.ExcludedPaths != null)
+                {
+                    foreach (string excludedPath in containerInfo.ExcludedPaths)
+                    {
+                        indexingPolicy.ExcludedPaths.Add(new ExcludedPath { Path = excludedPath });
+                    }
+                }
+
+                await CreateContainer(databaseName, containerInfo.Id, containerInfo.PartitionKeyPath, containerInfo.Throughput, indexingPolicy);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating containers in database '{databaseName}': {ex.Message}");
+            return false;
+        }
+    }
     public async Task<bool> CreateContainer(string databaseName,
                                             string containerName,
                                             string partitionKeyPath,
-                                            int throughput = 400,
+                                            int? throughput,
                                             IndexingPolicy indexingPolicy = null)
     {
         Console.BackgroundColor = ConsoleColor.Blue;
@@ -184,7 +221,7 @@ public class CosmosDBManager
             {
                 containerProperties.IndexingPolicy = indexingPolicy;
             }
-            var throughputProperties = ThroughputProperties.CreateManualThroughput(throughput);
+            var throughputProperties = ThroughputProperties.CreateManualThroughput(throughput ?? 400);
 
             var containerResponse = await database.CreateContainerIfNotExistsAsync(
                 containerProperties,
@@ -229,6 +266,17 @@ public class CosmosDBManager
         {
             Console.ResetColor();
         }
+    }
+
+    private IndexingMode ParseIndexingMode(string indexingModeString)
+    {
+        return indexingModeString.ToLowerInvariant() switch
+        {
+            "consistent" => IndexingMode.Consistent,
+            "lazy" => IndexingMode.Lazy,
+            "none" => IndexingMode.None,
+            _ => throw new ArgumentException($"Invalid IndexingMode string: {indexingModeString}")
+        };
     }
     /*
 

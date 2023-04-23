@@ -16,3 +16,8 @@ However, when creating a database, it's the opposite, the specified throughput i
 An indexing policy specifies the set of indexes that should be created for a container. An index is a way of organizing data that makes it easier and faster to query.
 By default, Cosmos DB indexes all properties of a container, and creates a range index on all string and numeric properties. However, this can lead to higher indexing costs and longer indexing times, especially for large containers with many properties.
 To improve performance, we need to define a custom indexing policy to specify the properties and types of indexes to create.
+
+## Optimizing queries for a read database in a CQRS project
+
+### Query Massive example
+In this context, we will set up containers focused on query performance and cost. Storage and request units (RUs) expended on writing will be disregarded in this scenario because, as the name suggests, the predominant activity in the database will be query execution.

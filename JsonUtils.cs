@@ -1,3 +1,4 @@
+using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
 
 namespace AzureCosmosDBSamples;
@@ -28,4 +29,5 @@ public static class JsonUtils
 
         return containers;
     }
+
 }

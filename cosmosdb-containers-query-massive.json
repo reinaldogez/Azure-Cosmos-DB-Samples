@@ -1,0 +1,19 @@
+[
+  {
+    "Id": "PostByAuthor",
+    "PartitionKeyPath": "/Author",
+    "Throughput" : 400,
+    "IndexingMode": "consistent",
+    "IncludedPaths": [
+        "/Author/*"
+    ],
+    "ExcludedPaths": [
+        "/*"
+    ]
+  },
+  {
+    "Id": "your_container_2_name",
+    "PartitionKeyPath": "/your_partition_key_2",
+    "IndexingMode": "consistent"
+  }
+]
