@@ -25,5 +25,7 @@ var serviceProvider = services.BuildServiceProvider();
 var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
 await cosmosDBManager.CheckConnection();
 //await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 800);
+List<ContainerInfo> containers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers.json");
+
 await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
 

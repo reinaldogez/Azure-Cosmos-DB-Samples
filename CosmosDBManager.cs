@@ -1,10 +1,10 @@
-﻿namespace AzureCosmosDBSamples;
-
-using System.Net;
+﻿using System.Net;
 using System.Reflection;
 using Microsoft.Azure.Cosmos;
 using System.Net.Http.Json;
 using System.Text;
+
+namespace AzureCosmosDBSamples;
 
 public class CosmosDBManager
 {
@@ -93,7 +93,7 @@ public class CosmosDBManager
         }
         return false;
     }
-    public static void ListProperties(object obj)
+    private static void ListProperties(object obj)
     {
         if (obj == null) return;
 
