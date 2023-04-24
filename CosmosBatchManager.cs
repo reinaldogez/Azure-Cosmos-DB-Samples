@@ -1,7 +1,5 @@
 using System.Net;
-using System.Reflection;
 using Microsoft.Azure.Cosmos;
-using System.Text;
 using System.Diagnostics;
 using System.Collections.Concurrent;
 

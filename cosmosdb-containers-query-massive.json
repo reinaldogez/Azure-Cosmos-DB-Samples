@@ -5,7 +5,7 @@
     "Throughput" : 5000,
     "IndexingMode": "consistent",
     "IncludedPaths": [
-        "/Author/*"
+        "/Author/?"
     ],
     "ExcludedPaths": [
         "/*"

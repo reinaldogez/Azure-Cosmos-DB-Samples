@@ -16,7 +16,7 @@ public static class DatabaseSeeder
 
         try
         {
-            int numberOfAuthors = 1000;
+            int numberOfAuthors = 10000;
             int minPostsPerAuthor = 2;
             int maxPostsPerAuthor = 20;
 

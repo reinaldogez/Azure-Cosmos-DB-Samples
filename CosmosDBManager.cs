@@ -3,7 +3,6 @@ using System.Reflection;
 using Microsoft.Azure.Cosmos;
 using System.Text;
 using System.Diagnostics;
-using System.Collections.Concurrent;
 
 namespace AzureCosmosDBSamples;
 
@@ -19,9 +18,6 @@ public class CosmosDBManager
     }
     public async Task<bool> CheckConnection()
     {
-        Console.BackgroundColor = ConsoleColor.Blue;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-
         Console.WriteLine("Testing Connection...\n");
 
         try
@@ -33,34 +29,22 @@ public class CosmosDBManager
         }
         catch (CosmosException ce)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.BackgroundColor = ConsoleColor.Red;
             Exception baseException = ce.GetBaseException();
             Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
         }
         catch (Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Red;
             Console.WriteLine("Error: {0}", e);
-        }
-        finally
-        {
-            Console.ResetColor();
         }
         return false;
     }
 
     public async Task<bool> CreateDatabase(string dataBaseName, int throughput = 400)
     {
-        Console.BackgroundColor = ConsoleColor.Blue;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-
         Console.WriteLine("Creating database...\n");
 
         try
         {
-            // Create the throughput properties with the specified throughput value
             ThroughputProperties throughputProperties = ThroughputProperties.CreateManualThroughput(throughput);
             DatabaseResponse databaseResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(dataBaseName, throughputProperties: throughputProperties);
             if (databaseResponse.StatusCode == HttpStatusCode.OK)
@@ -76,21 +60,12 @@ public class CosmosDBManager
         }
         catch (CosmosException ce)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.BackgroundColor = ConsoleColor.Red;
-
             Exception baseException = ce.GetBaseException();
             Console.WriteLine("{0} error occurred: {1}", ce.StatusCode, ce);
         }
         catch (Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Red;
             Console.WriteLine("Error: {0}", e);
-        }
-        finally
-        {
-            Console.ResetColor();
         }
         return false;
     }
@@ -115,9 +90,6 @@ public class CosmosDBManager
 
     public async Task<bool> CheckDatabaseExists(string databaseName)
     {
-        Console.BackgroundColor = ConsoleColor.Blue;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-
         Console.WriteLine("Checking database...\n");
 
         try
@@ -147,21 +119,12 @@ public class CosmosDBManager
         }
         catch (CosmosException ce)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.BackgroundColor = ConsoleColor.Red;
-
             Exception baseException = ce.GetBaseException();
             Console.WriteLine("{0} CosmosException occurred: {1}", ce.StatusCode, ce);
         }
         catch (Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.BackgroundColor = ConsoleColor.Red;
             Console.WriteLine("Error: {0}", e);
-        }
-        finally
-        {
-            Console.ResetColor();
         }
         return false;
     }
@@ -203,15 +166,13 @@ public class CosmosDBManager
             return false;
         }
     }
+
     public async Task<bool> CreateContainer(string databaseName,
                                             string containerName,
                                             string partitionKeyPath,
                                             int? throughput = null,
                                             IndexingPolicy indexingPolicy = null)
     {
-        Console.BackgroundColor = ConsoleColor.Blue;
-        Console.ForegroundColor = ConsoleColor.Yellow;
-
         Console.WriteLine("Creating container...\n");
 
         try
@@ -248,7 +209,10 @@ public class CosmosDBManager
             stringBuilder.AppendLine($"ETag: {containerPropertiesResponse.ETag}");
             stringBuilder.AppendLine($"PartitionKeyPath: {containerPropertiesResponse.PartitionKeyPath}");
             stringBuilder.AppendLine($"DefaultTimeToLive: {containerPropertiesResponse.DefaultTimeToLive}");
-            stringBuilder.AppendLine($"IndexingPolicy: {containerPropertiesResponse.IndexingPolicy}");
+            foreach (IncludedPath includedPath in containerPropertiesResponse.IndexingPolicy.IncludedPaths)
+                stringBuilder.AppendLine($"IndexingPolicy IncludedPath: {includedPath.Path}");
+            foreach (ExcludedPath excludedPath in containerPropertiesResponse.IndexingPolicy.ExcludedPaths)
+                stringBuilder.AppendLine($"IndexingPolicy ExcludedPath: {excludedPath.Path}");
 
             Console.WriteLine(stringBuilder.ToString());
 
@@ -263,10 +227,6 @@ public class CosmosDBManager
         {
             Console.WriteLine($"Exception: {ex.Message}");
             return false;
-        }
-        finally
-        {
-            Console.ResetColor();
         }
     }
 
@@ -358,17 +318,6 @@ public class CosmosDBManager
         }
 
         return -1;
-    }
-
-    private string GetPartitionKeyValue<T>(T item, string partitionKeyPath)
-    {
-        Type itemType = typeof(T);
-        PropertyInfo partitionKeyProperty = itemType.GetProperty(partitionKeyPath);
-        if (partitionKeyProperty == null)
-        {
-            throw new ArgumentException($"Property {partitionKeyPath} not found on type {itemType.Name}.");
-        }
-        return partitionKeyProperty.GetValue(item).ToString();
     }
 
     public Container GetContainer(string databaseName, string containerName)
