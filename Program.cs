@@ -15,17 +15,34 @@ services.AddSingleton<IConfiguration>(configuration);
 var cosmosDbSettings = new CosmosDbSettings();
 configuration.Bind("CosmosDbSettings", cosmosDbSettings);
 
-// Register CosmosClient as a singleton instance
-services.AddSingleton(s => new CosmosClient(cosmosDbSettings.EndpointUri, cosmosDbSettings.PrimaryKey));
+CosmosClientOptions cosmosClientOptions = new CosmosClientOptions
+{
+    AllowBulkExecution = true
+};
+services.AddSingleton(s => new CosmosClient(cosmosDbSettings.EndpointUri, cosmosDbSettings.PrimaryKey, cosmosClientOptions));
 services.AddScoped<CosmosDBManager>();
+services.AddScoped<CosmosBatchManager>();
 services.AddSingleton<CosmosDbSettings>(cosmosDbSettings);
 
 var serviceProvider = services.BuildServiceProvider();
 
 var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
-await cosmosDBManager.CheckConnection();
-//await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 800);
+//await cosmosDBManager.CheckConnection();
+await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 8000);
+
 List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-query-massive.json");
 await cosmosDBManager.CreateContainersList(queryMassiveContainers, cosmosDbSettings.DatabaseName);
-await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
+
+List<CosmosPostEntity> listCosmosPostEntities2 = DatabaseSeeder.SeedPostByAuthorContainer();
+// await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "PostByAuthor", listCosmosPostEntities2);
+
+List<CosmosPostEntity> listCosmosPostEntities = DatabaseSeeder.SeedPostByAuthorContainer();
+List<PostEntity> postList = listCosmosPostEntities.ConvertAll(c => (PostEntity)c);
+var cosmosBatchManager = serviceProvider.GetRequiredService<CosmosBatchManager>();
+
+await cosmosBatchManager.InsertBatchItemsAsync(cosmosDbSettings.DatabaseName, "PostByAuthor", listCosmosPostEntities, post => post.Author);
+
+
+
+// await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
 

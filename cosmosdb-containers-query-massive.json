@@ -2,7 +2,7 @@
   {
     "Id": "PostByAuthor",
     "PartitionKeyPath": "/Author",
-    "Throughput" : 400,
+    "Throughput" : 5000,
     "IndexingMode": "consistent",
     "IncludedPaths": [
         "/Author/*"

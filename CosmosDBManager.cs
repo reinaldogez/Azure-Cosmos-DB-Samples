@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using System.Reflection;
 using Microsoft.Azure.Cosmos;
-using System.Net.Http.Json;
 using System.Text;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 namespace AzureCosmosDBSamples;
 
@@ -93,6 +94,7 @@ public class CosmosDBManager
         }
         return false;
     }
+
     private static void ListProperties(object obj)
     {
         if (obj == null) return;
@@ -204,7 +206,7 @@ public class CosmosDBManager
     public async Task<bool> CreateContainer(string databaseName,
                                             string containerName,
                                             string partitionKeyPath,
-                                            int? throughput,
+                                            int? throughput = null,
                                             IndexingPolicy indexingPolicy = null)
     {
         Console.BackgroundColor = ConsoleColor.Blue;
@@ -278,11 +280,125 @@ public class CosmosDBManager
             _ => throw new ArgumentException($"Invalid IndexingMode string: {indexingModeString}")
         };
     }
+
+    public async Task InsertBulkItemsAsync<T>(string databaseName, string containerName, List<T> items)
+    {
+        Console.WriteLine($"Starting bulk insert of {items.Count} items into container {containerName}...");
+
+        int totalRequestCharge = 0;
+        int insertedCount = 0;
+        int failedCount = 0;
+
+        Container container = GetContainer(databaseName, containerName);
+
+        Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start();
+
+        List<Task<int>> tasks = new List<Task<int>>(items.Count);
+
+        foreach (var item in items)
+        {
+            tasks.Add(InsertItemWithRetryAsync(container, item));
+        }
+
+        var results = await Task.WhenAll(tasks);
+
+        foreach (var result in results)
+        {
+            if (result > 0)
+            {
+                totalRequestCharge += result;
+                insertedCount++;
+            }
+            else
+            {
+                failedCount++;
+            }
+        }
+
+        stopWatch.Stop();
+        TimeSpan ts = stopWatch.Elapsed;
+
+        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+            ts.Hours, ts.Minutes, ts.Seconds,
+            ts.Milliseconds / 10);
+
+        Console.WriteLine("\tTotal time: {0}", elapsedTime);
+
+        Console.WriteLine($"Bulk insert of {items.Count} items into container {containerName} complete.");
+        Console.WriteLine($"Total request charge: {totalRequestCharge}");
+        Console.WriteLine($"Inserted items: {insertedCount}");
+        Console.WriteLine($"Failed items: {failedCount}");
+    }
+
+    private async Task<int> InsertItemWithRetryAsync<T>(Container container, T item, int maxRetries = 5)
+    {
+        int currentRetry = 0;
+
+        while (currentRetry <= maxRetries)
+        {
+            try
+            {
+                ItemResponse<T> response = await container.CreateItemAsync(item);
+                return (int)response.RequestCharge;
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                if (currentRetry == maxRetries)
+                {
+                    return -1;
+                }
+
+                currentRetry++;
+
+                // Wait for the recommended delay before retrying
+                TimeSpan retryDelay = ex.RetryAfter ?? TimeSpan.FromSeconds(1);
+                await Task.Delay(retryDelay);
+            }
+        }
+
+        return -1;
+    }
+
+    private string GetPartitionKeyValue<T>(T item, string partitionKeyPath)
+    {
+        Type itemType = typeof(T);
+        PropertyInfo partitionKeyProperty = itemType.GetProperty(partitionKeyPath);
+        if (partitionKeyProperty == null)
+        {
+            throw new ArgumentException($"Property {partitionKeyPath} not found on type {itemType.Name}.");
+        }
+        return partitionKeyProperty.GetValue(item).ToString();
+    }
+
+    public Container GetContainer(string databaseName, string containerName)
+    {
+        Console.WriteLine($"Getting container: {containerName}");
+
+        try
+        {
+            Database database = _cosmosClient.GetDatabase(databaseName);
+            Container container = database.GetContainer(containerName);
+            return container;
+        }
+        catch (CosmosException ex)
+        {
+            Console.WriteLine($"CosmosException: {ex.Message}");
+            Console.WriteLine($"StatusCode: {ex.StatusCode}");
+            Console.WriteLine($"ActivityId: {ex.ActivityId}");
+            Console.WriteLine($"InnerException: {ex.InnerException}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+            Console.WriteLine($"InnerException: {ex.InnerException}");
+            return null;
+        }
+    }
+
     /*
-
         DeleteContainer(string databaseName, string containerName): This method would delete an existing container from the specified database.
-
-        GetContainer(string databaseName, string containerName): This method would retrieve an existing container from the specified database.
 
         GetContainers(string databaseName): This method would return a list of all containers in the specified database.
     */

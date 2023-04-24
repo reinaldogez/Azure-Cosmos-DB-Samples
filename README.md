@@ -21,3 +21,10 @@ To improve performance, we need to define a custom indexing policy to specify th
 
 ### Query Massive example
 In this context, we will set up containers focused on query performance and cost. Storage and request units (RUs) expended on writing will be disregarded in this scenario because, as the name suggests, the predominant activity in the database will be query execution.
+
+### CosmosBatchManager
+Restrictions on the batch request
+- Group items by their partition key.
+- Create separate batches for each partition key group.
+- Limit the number of operations in each batch to a number below 100 and ensure the total request size does not exceed 2 MB.
+- Execute each batch separately, and if needed, implement retries or error handling for failed operations.
