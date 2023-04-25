@@ -3,8 +3,9 @@ using System.Reflection;
 using Microsoft.Azure.Cosmos;
 using System.Text;
 using System.Diagnostics;
+using AzureCosmosDBSamples.Utils;
 
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Managers;
 
 public class CosmosDBManager
 {

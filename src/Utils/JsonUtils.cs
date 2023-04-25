@@ -1,7 +1,7 @@
-using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
+using AzureCosmosDBSamples.Utils;
 
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Utils;
 
 public static class JsonUtils
 {

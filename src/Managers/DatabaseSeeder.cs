@@ -1,9 +1,9 @@
-using System;
-using System.Linq;
 using Bogus;
-using Microsoft.Extensions.DependencyInjection;
+using AzureCosmosDBSamples.Entities;
 
-namespace AzureCosmosDBSamples;
+
+namespace AzureCosmosDBSamples.Managers;
+
 public static class DatabaseSeeder
 {
     public static void Seed(IServiceProvider serviceProvider)

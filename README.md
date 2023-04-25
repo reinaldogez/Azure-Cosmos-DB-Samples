@@ -24,9 +24,9 @@ To improve performance, we need to define a custom indexing policy to specify th
 ### Query Massive example
 In this context, we will set up containers focused on query performance and cost. Storage and request units (RUs) expended on writing will be disregarded in this scenario because, as the name suggests, the predominant activity in the database will be query execution.
 
-# Json container creation config
+## Json files with containers config
 
-## cosmosdb-containers-default-settings.json
+### cosmosdb-containers-default-settings.json
 This JSON will create the containers in a more common way, with default indexes and the 'id' field being used as the partition key.
 
 ## Project Classes

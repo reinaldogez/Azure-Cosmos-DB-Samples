@@ -2,8 +2,9 @@ using System.Net;
 using Microsoft.Azure.Cosmos;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using AzureCosmosDBSamples.Utils;
 
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Managers;
 
 public class CosmosBatchManager
 {

@@ -1,6 +1,7 @@
 using System.Diagnostics;
+using AzureCosmosDBSamples.Managers;
 
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Utils;
 
 public class CosmosQueryMetrics
 {

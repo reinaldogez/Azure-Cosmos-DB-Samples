@@ -1,4 +1,4 @@
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Utils;
 
 public class ContainerInfo
 {

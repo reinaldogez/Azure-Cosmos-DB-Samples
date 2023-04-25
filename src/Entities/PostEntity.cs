@@ -1,4 +1,4 @@
-namespace AzureCosmosDBSamples;
+namespace AzureCosmosDBSamples.Entities;
 
 public class PostEntity
 {

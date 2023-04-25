@@ -2,6 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using AzureCosmosDBSamples;
 using Microsoft.Azure.Cosmos;
+using AzureCosmosDBSamples.Managers;
+using AzureCosmosDBSamples.Entities;
+using AzureCosmosDBSamples.Utils;
+
 
 var builder = new ConfigurationBuilder()
     .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -196,15 +200,15 @@ async Task<bool> SeedDatabase()
 
     List<CosmosPostEntity> listCosmosPostEntities2 = DatabaseSeeder.SeedPostByAuthorContainer();
     await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "Post", listCosmosPostEntities2);
-    return false;
+    return true;
 }
 
 async Task<bool> CreateContainers()
 {
-    List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-query-massive.json");
+    List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile("..\\config\\cosmosdb-containers-query-massive.json");
     await cosmosDBManager.CreateContainersList(queryMassiveContainers, cosmosDbSettings.DatabaseName);
 
-    List<ContainerInfo> defaultContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-default-settings.json");
+    List<ContainerInfo> defaultContainers = JsonUtils.GetContainersFromJsonFile("..\\config\\cosmosdb-containers-default-settings.json");
     await cosmosDBManager.CreateContainersList(defaultContainers, cosmosDbSettings.DatabaseName);
     return true;
 }
