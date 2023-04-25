@@ -10,45 +10,41 @@ public class CosmosQueryMetrics
     {
         _cosmosQueryEngine = cosmosQueryEngine;
     }
-    public async Task<List<T>> QueryMassiveQueryContainerPostByAuthor<T>(string author, string databaseName, string containerName)
+
+    public async Task<List<T>> GenericQuery<T>(string query, string databaseName, string containerName, string queryName, bool populateIndexMetrics = false)
     {
-        Stopwatch stopWatch = new Stopwatch();
-        stopWatch.Start();
+        long startTimestamp = Stopwatch.GetTimestamp();
 
-        var queryString = $"SELECT * FROM c WHERE c.Author = '{author}'";
-        var (results, requestCharge) = await _cosmosQueryEngine.QueryItems<T>(queryString, databaseName, containerName);
+        var (results, requestCharge) = await _cosmosQueryEngine.QueryItems<T>(query, databaseName, containerName);
 
-        Console.WriteLine($"Total request charge QueryMassiveQueryContainerPostByAuthor: {requestCharge}");
-        stopWatch.Stop();
-        TimeSpan ts = stopWatch.Elapsed;
+        Console.WriteLine($"Total request charge {queryName}: {requestCharge}");
 
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
-            ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds / 10);
+        long endTimestamp = Stopwatch.GetTimestamp();
+        long timestampDifference = endTimestamp - startTimestamp;
 
-        Console.WriteLine("\tTotal time QueryMassiveQueryContainerPostByAuthor: {0}", elapsedTime);
+        double elapsedTimeInMilliseconds = ((double)timestampDifference / Stopwatch.Frequency) * 1000;
+
+        Console.WriteLine($"Total time {queryName}: {elapsedTimeInMilliseconds} milliseconds");
+
         return results;
     }
 
-    public async Task<List<T>> QueryDefaultPostByAuthor<T>(string author, string databaseName, string containerName)
+    public async Task<T> GenericQuerySingleValueAsync<T>(
+        string query, string databaseName, string containerName, string queryName, bool populateIndexMetrics = false)
     {
-        Stopwatch stopWatch = new Stopwatch();
-        stopWatch.Start();
+        long startTimestamp = Stopwatch.GetTimestamp();
 
-        var queryString = $"SELECT * FROM c WHERE c.Author = '{author}'";
-        var (results, requestCharge) = await _cosmosQueryEngine.QueryItems<T>(queryString, databaseName, containerName);
+        var (result, requestCharge) = await _cosmosQueryEngine.QuerySingleValueAsync<T>(query, databaseName, containerName, populateIndexMetrics);
 
-        Console.WriteLine($"Total request charge QueryDefaultPostByAuthor: {requestCharge}");
+        Console.WriteLine($"Total request charge {queryName}: {requestCharge}");
 
-        stopWatch.Stop();
-        TimeSpan ts = stopWatch.Elapsed;
+        long endTimestamp = Stopwatch.GetTimestamp();
+        long timestampDifference = endTimestamp - startTimestamp;
 
-        string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:000}",
-            ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds / 10);
+        double elapsedTimeInMilliseconds = ((double)timestampDifference / Stopwatch.Frequency) * 1000;
 
-        Console.WriteLine("\tTotal time QueryDefaultPostByAuthor: {0}", elapsedTime);
-        return results;
+        Console.WriteLine($"Total time {queryName}: {elapsedTimeInMilliseconds} milliseconds");
+
+        return (result);
     }
-
 }

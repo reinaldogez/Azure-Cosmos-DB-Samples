@@ -8,6 +8,8 @@ The project includes a Docker Compose file that allows you to run the Azure Cosm
 
 ## Cosmos Concepts
 
+### Partition Key
+
 ### Throughput
 When creating a container, the specified throughput is the maximum number of Request Units (RU) per second that the container can handle.
 However, when creating a database, it's the opposite, the specified throughput is the minimum amount of Request Units (RU) per second that we want to allocate to it. If you don't specify the throughput while creating a database in Azure Cosmos DB, the system will use the default throughput value, which is 400 Request Units per second (RU/s).

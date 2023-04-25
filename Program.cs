@@ -50,29 +50,85 @@ await cosmosDBManager.CreateContainersList(defaultContainers, cosmosDbSettings.D
 
 var _cosmosQueryMetrics = serviceProvider.GetRequiredService<CosmosQueryMetrics>();
 
-List<CosmosPostEntity> listCosmosPostEntitiesQueryResponse2 = await 
-    _cosmosQueryMetrics.QueryDefaultPostByAuthor<CosmosPostEntity>(
-        "x", 
-        cosmosDbSettings.DatabaseName, 
-        "Post"
+await QueryNumberOfRowsInContainers();
+await ComparePerfomanceBetweenPostByAuthorAndPostContainers();
+await ComparePerfomanceBetweenPostByAuthorAndPostContainers();
+
+async Task<bool> ComparePerfomanceBetweenPostByAuthorAndPostContainers()
+{
+    Console.ForegroundColor = ConsoleColor.Green;
+    List<CosmosPostEntity> QueryDefaultPostByAuthorResponse =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'z'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "Post",
+            queryName: "Query container Post(First query in Post container, Author doesn't exist in database)"
+        );
+
+    List<CosmosPostEntity> QueryDefaultPostByAuthorResponse2 =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'w'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "Post",
+            queryName: "Query container Post(Author doesn't exist in database)"
+        );
+    List<CosmosPostEntity> QueryDefaultPostByAuthorResponse3 =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'Christa Howell'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "Post",
+            queryName: "Query container Post(Author exists in database)"
+        );
+    Console.ResetColor();
+    Console.WriteLine();
+
+    Console.ForegroundColor = ConsoleColor.Magenta;
+    List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'x'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "PostByAuthor",
+            queryName: "Query container PostByAuthor(First query in PostByAuthor container, Author doesn't exist in database)"
+        );
+
+    List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor2 =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'y'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "PostByAuthor",
+            queryName: "Query container PostByAuthor(Author doesn't exist in database)"
+        );
+
+    List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor3 =
+        await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
+            query: $"SELECT * FROM c WHERE c.Author = 'Sydney Kiehn'",
+            cosmosDbSettings.DatabaseName,
+            containerName: "PostByAuthor",
+            queryName: "Query container PostByAuthor(Author exists in database)"
+        );
+    Console.ResetColor();
+    Console.WriteLine();
+
+    List<PostEntity> postList = QueryMassiveQueryContainerPostByAuthor3.ConvertAll(c => (PostEntity)c);
+    return true;
+}
+
+async Task<bool> QueryNumberOfRowsInContainers()
+{
+    long numberOfRowsInPostByAuthorContainer = await _cosmosQueryMetrics.GenericQuerySingleValueAsync<long>(
+        query: "SELECT VALUE COUNT(1) FROM c",
+        cosmosDbSettings.DatabaseName,
+        containerName: "PostByAuthor",
+        queryName: "Query number of rows in PostByAuthor container"
     );
+    Console.WriteLine($"Number of rows in PostByAuthor container {string.Format("{0:N0}", numberOfRowsInPostByAuthorContainer)}");
 
-List<CosmosPostEntity> listCosmosPostEntitiesQueryResponse3 = await 
-    _cosmosQueryMetrics.QueryDefaultPostByAuthor<CosmosPostEntity>(
-        "x", 
-        cosmosDbSettings.DatabaseName, 
-        "Post"
+    long numberOfRowsInPostContainer = await _cosmosQueryMetrics.GenericQuerySingleValueAsync<long>(
+        query: "SELECT VALUE COUNT(1) FROM c",
+        cosmosDbSettings.DatabaseName,
+        containerName: "Post",
+        queryName: "Query number of rows in Post container"
     );
-
-
-List<CosmosPostEntity> listCosmosPostEntitiesQueryResponse = await 
-    _cosmosQueryMetrics.QueryMassiveQueryContainerPostByAuthor<CosmosPostEntity>(
-        "x", 
-        cosmosDbSettings.DatabaseName, 
-        "PostByAuthor"
-    );
-
-
-List<PostEntity> postList = listCosmosPostEntitiesQueryResponse.ConvertAll(c => (PostEntity)c);
-
-
+    Console.WriteLine($"Number of rows in Post container {string.Format("{0:N0}", numberOfRowsInPostContainer)}");
+    return true;
+}
