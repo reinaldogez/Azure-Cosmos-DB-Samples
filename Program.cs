@@ -29,33 +29,81 @@ services.AddSingleton<CosmosDbSettings>(cosmosDbSettings);
 var serviceProvider = services.BuildServiceProvider();
 
 var cosmosDBManager = serviceProvider.GetRequiredService<CosmosDBManager>();
-//await cosmosDBManager.CheckConnection();
-// await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
-//await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 8000);
-
-List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-query-massive.json");
-await cosmosDBManager.CreateContainersList(queryMassiveContainers, cosmosDbSettings.DatabaseName);
-//List<CosmosPostEntity> listCosmosPostEntities = DatabaseSeeder.SeedPostByAuthorContainer();
-//var cosmosBatchManager = serviceProvider.GetRequiredService<CosmosBatchManager>();
-// await cosmosBatchManager.InsertBatchItemsAsync(cosmosDbSettings.DatabaseName, "PostByAuthor", listCosmosPostEntities, post => post.Author);
-
-// List<CosmosPostEntity> listCosmosPostEntities2 = DatabaseSeeder.SeedPostByAuthorContainer();
-// await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "PostByAuthor", listCosmosPostEntities2);
-
-List<ContainerInfo> defaultContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-default-settings.json");
-await cosmosDBManager.CreateContainersList(defaultContainers, cosmosDbSettings.DatabaseName);
-// List<CosmosPostEntity> listCosmosPostEntities3 = DatabaseSeeder.SeedPostByAuthorContainer();
-// await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "Post", listCosmosPostEntities3);
-
-
 var _cosmosQueryMetrics = serviceProvider.GetRequiredService<CosmosQueryMetrics>();
 
-await QueryNumberOfRowsInContainers();
-await ComparePerfomanceBetweenPostByAuthorAndPostContainers();
-await ComparePerfomanceBetweenPostByAuthorAndPostContainers();
+try
+{
+    await Go();
+}
+catch (Exception e)
+{
+    Console.WriteLine("Error: {0}", e);
+}
+finally
+{
+    Console.WriteLine("End of Azure-Cosmos-DB-Samples, press any key to exit.");
+    Console.ReadLine();
+}
+
+async Task Go()
+{
+    while (true)
+    {
+        PrintPrompt();
+
+        ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+        switch (consoleKeyInfo.Key)
+        {
+            case ConsoleKey.D0:
+                await CheckAndCreateDatabase();
+                await CreateContainers();
+                break;
+            case ConsoleKey.D1:
+                await SeedDatabase();
+                break;
+            case ConsoleKey.D2:
+                await ComparePerfomanceBetweenPostByAuthorAndPostContainers();
+                break;
+            case ConsoleKey.D3:
+
+                break;
+            case ConsoleKey.D4:
+
+                break;
+            case ConsoleKey.D5:
+
+                break;
+            case ConsoleKey.D6:
+
+                break;
+            case ConsoleKey.D7:
+
+                break;
+            case ConsoleKey.D8:
+
+                break;
+            case ConsoleKey.Escape:
+                Console.WriteLine("Exiting...");
+                return;
+            default:
+                Console.WriteLine("Select choice");
+                break;
+        }
+    }
+}
+
+void PrintPrompt()
+{
+    Console.WriteLine("0 - Scenario 0: Setup Cosmos DB and Containers");
+    Console.WriteLine("1 - Scenario 1: Seed Database");
+    Console.WriteLine("2 - Scenario 2: Compare perfomance between PostByAuthor and Post containers");
+}
+
 
 async Task<bool> ComparePerfomanceBetweenPostByAuthorAndPostContainers()
 {
+    await QueryNumberOfRowsInContainers();
+
     Console.ForegroundColor = ConsoleColor.Green;
     List<CosmosPostEntity> QueryDefaultPostByAuthorResponse =
         await _cosmosQueryMetrics.GenericQuery<CosmosPostEntity>(
@@ -130,5 +178,33 @@ async Task<bool> QueryNumberOfRowsInContainers()
         queryName: "Query number of rows in Post container"
     );
     Console.WriteLine($"Number of rows in Post container {string.Format("{0:N0}", numberOfRowsInPostContainer)}");
+    return true;
+}
+
+async Task<bool> CheckAndCreateDatabase()
+{
+    await cosmosDBManager.CheckConnection();
+    await cosmosDBManager.CheckDatabaseExists(cosmosDbSettings.DatabaseName);
+    await cosmosDBManager.CreateDatabase(cosmosDbSettings.DatabaseName, throughput: 8000);
+    return true;
+}
+
+async Task<bool> SeedDatabase()
+{
+    List<CosmosPostEntity> listCosmosPostEntities = DatabaseSeeder.SeedPostByAuthorContainer();
+    await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "PostByAuthor", listCosmosPostEntities);
+
+    List<CosmosPostEntity> listCosmosPostEntities2 = DatabaseSeeder.SeedPostByAuthorContainer();
+    await cosmosDBManager.InsertBulkItemsAsync(cosmosDbSettings.DatabaseName, "Post", listCosmosPostEntities2);
+    return false;
+}
+
+async Task<bool> CreateContainers()
+{
+    List<ContainerInfo> queryMassiveContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-query-massive.json");
+    await cosmosDBManager.CreateContainersList(queryMassiveContainers, cosmosDbSettings.DatabaseName);
+
+    List<ContainerInfo> defaultContainers = JsonUtils.GetContainersFromJsonFile("cosmosdb-containers-default-settings.json");
+    await cosmosDBManager.CreateContainersList(defaultContainers, cosmosDbSettings.DatabaseName);
     return true;
 }

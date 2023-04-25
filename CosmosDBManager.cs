@@ -23,8 +23,24 @@ public class CosmosDBManager
         try
         {
             AccountProperties accountProperties = await _cosmosClient.ReadAccountAsync();
-            ListProperties(accountProperties);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("ReadableRegions");
+            foreach (AccountRegion accountReadableRegion in accountProperties.ReadableRegions)
+            {
+                sb.AppendLine(accountReadableRegion.Name);
+                sb.AppendLine(accountReadableRegion.Endpoint);
+            }
+            sb.AppendLine("WritableRegions");
+            foreach (AccountRegion accountWritableRegion in accountProperties.WritableRegions)
+            {
+                sb.AppendLine(accountWritableRegion.Name);
+                sb.AppendLine(accountWritableRegion.Endpoint);
+            }
+            sb.AppendLine($"DefaultConsistencyLevel: {accountProperties.Consistency.DefaultConsistencyLevel}");
+            Console.WriteLine(sb.ToString());
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Connection to Cosmos Emulator is Ok.");
+            Console.ResetColor();
             return true;
         }
         catch (CosmosException ce)

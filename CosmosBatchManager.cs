@@ -16,6 +16,9 @@ public class CosmosBatchManager
         _cosmosDbSettings = cosmosDbSettings;
     }
 
+    // How to use CosmosBatchManager.InsertBatchItemsAsync<T>()
+    // List<CosmosPostEntity> items = DatabaseSeeder.SeedPostByAuthorContainer();
+    // await InsertBatchItemsAsync<CosmosPostEntity>(cosmosDbSettings.DatabaseName, "containerName", items, post => post.Author);
     public async Task InsertBatchItemsAsync<T>(string databaseName, string containerName, List<T> items, Func<T, string> partitionKeySelector)
     {
         Console.WriteLine($"Starting batch insert of {items.Count} items into container {containerName}...");
