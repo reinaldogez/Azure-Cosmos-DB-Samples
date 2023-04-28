@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/AzureCosmosDBSamples.csproj",
+                "${workspaceFolder}/src/AzureCosmosDBSamples.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/AzureCosmosDBSamples.csproj",
+                "${workspaceFolder}/src/AzureCosmosDBSamples.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -33,7 +33,7 @@
                 "watch",
                 "run",
                 "--project",
-                "${workspaceFolder}/AzureCosmosDBSamples.csproj"
+                "${workspaceFolder}/src/AzureCosmosDBSamples.csproj"
             ],
             "problemMatcher": "$msCompile"
         }

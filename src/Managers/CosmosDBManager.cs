@@ -173,7 +173,7 @@ public class CosmosDBManager
                     }
                 }
 
-                await CreateContainer(databaseName, containerInfo.Id, containerInfo.PartitionKeyPath, containerInfo.Throughput, indexingPolicy);
+                await CreateContainer(databaseName, containerInfo.Name, containerInfo.PartitionKeyPath, containerInfo.Throughput, indexingPolicy);
             }
             return true;
         }

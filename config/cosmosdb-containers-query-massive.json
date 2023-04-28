@@ -1,8 +1,8 @@
 [
   {
-    "Id": "PostByAuthor",
+    "Name": "PostByAuthor",
     "PartitionKeyPath": "/Author",
-    "Throughput" : 5000,
+    "Throughput" : 20000,
     "IndexingMode": "consistent",
     "IncludedPaths": [
         "/Author/?"
@@ -12,8 +12,15 @@
     ]
   },
   {
-    "Id": "your_container_2_name",
-    "PartitionKeyPath": "/your_partition_key_2",
-    "IndexingMode": "consistent"
+    "Name": "PostByLikes",
+    "PartitionKeyPath": "/Likes",
+    "Throughput" : 20000,
+    "IndexingMode": "consistent",
+    "IncludedPaths": [
+        "/Likes/?"
+    ],
+    "ExcludedPaths": [
+        "/*"
+    ]
   }
 ]

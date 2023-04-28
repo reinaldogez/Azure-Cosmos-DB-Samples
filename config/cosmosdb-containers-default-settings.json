@@ -1,12 +1,12 @@
 [
   {
-    "Id": "Post",
+    "Name": "Post",
     "PartitionKeyPath": "/id",
-    "Throughput" : 5000,
+    "Throughput" : 20000,
     "IndexingMode": "consistent"
   },
   {
-    "Id": "your_container_2_name",
+    "Name": "your_container_2_name",
     "PartitionKeyPath": "/your_partition_key_2",
     "IndexingMode": "consistent"
   }

@@ -2,7 +2,7 @@ namespace AzureCosmosDBSamples.Utils;
 
 public class ContainerInfo
 {
-    public string Id { get; set; }
+    public string Name { get; set; }
     public string PartitionKeyPath { get; set; }
     public int? Throughput { get; set; }
     public string IndexingMode { get; set; }
