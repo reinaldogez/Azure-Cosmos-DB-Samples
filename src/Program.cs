@@ -115,7 +115,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
     Console.ForegroundColor = ConsoleColor.Green;
     List<CosmosPostEntity> QueryDefaultPostByAuthorResponse =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'z'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "z" }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "Post",
             queryName: "Query container Post(First query in Post container, Author doesn't exist in database)"
@@ -123,14 +127,22 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
 
     List<CosmosPostEntity> QueryDefaultPostByAuthorResponse2 =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'w'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "w" }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "Post",
             queryName: "Query container Post(Author doesn't exist in database)"
         );
     List<CosmosPostEntity> QueryDefaultPostByAuthorResponse3 =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'Christa Howell'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "Christa Howell" }
+            },            
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "Post",
             queryName: "Query container Post(Author exists in database)"
@@ -141,7 +153,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
     Console.ForegroundColor = ConsoleColor.Magenta;
     List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'x'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "x" }
+            },            
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query container PostByAuthor(First query in PostByAuthor container, Author doesn't exist in database)"
@@ -149,7 +165,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
 
     List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor2 =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'y'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "y" }
+            },  
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query container PostByAuthor(Author doesn't exist in database)"
@@ -157,7 +177,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
 
     List<CosmosPostEntity> QueryMassiveQueryContainerPostByAuthor3 =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Author = 'Sydney Kiehn'",
+            query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
+            parameters: new Dictionary<string, object>
+            {
+            { "@authorName", "Sydney Kiehn" }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query container PostByAuthor(Author exists in database)"
@@ -206,7 +230,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorPostByLikesAndPostContaine
 
     List<CosmosPostEntity> PostsByLikesInDefaultPostContainer =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Likes > {numberOfLikes}",
+            query: "SELECT * FROM c WHERE c.Likes > @numberOfLikes",
+            parameters: new Dictionary<string, object>
+            {
+            { "@numberOfLikes", numberOfLikes }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "Post",
             queryName: "Query by number of likes in Post container (First query)",
@@ -214,7 +242,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorPostByLikesAndPostContaine
         );
     List<CosmosPostEntity> PostsByLikesInPostByAuthorContainer =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Likes > {numberOfLikes}",
+            query: $"SELECT * FROM c WHERE c.Likes > @numberOfLikes",
+            parameters: new Dictionary<string, object>
+            {
+            { "@numberOfLikes", numberOfLikes }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query by number of likes in PostByAuthor container (First query)",
@@ -222,7 +254,11 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorPostByLikesAndPostContaine
         );
     List<CosmosPostEntity> PostsByLikesInPostByLikesContainer =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
-            query: $"SELECT * FROM c WHERE c.Likes > {numberOfLikes}",
+            query: $"SELECT * FROM c WHERE c.Likes > @numberOfLikes",
+            parameters: new Dictionary<string, object>
+            {
+            { "@numberOfLikes", numberOfLikes }
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByLikes",
             queryName: "Query by number of likes in PostByLikes container (First query)",

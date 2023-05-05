@@ -12,11 +12,11 @@ public class CosmosQueryMetrics
         _cosmosQueryEngine = cosmosQueryEngine;
     }
 
-    public async Task<List<T>> QueryItemsWithMetricsAsync<T>(string query, string databaseName, string containerName, string queryName, bool populateIndexMetrics = false)
+    public async Task<List<T>> QueryItemsWithMetricsAsync<T>(string query, Dictionary<string, object> parameters, string databaseName, string containerName, string queryName, bool populateIndexMetrics = false)
     {
         long startTimestamp = Stopwatch.GetTimestamp();
 
-        var (results, requestCharge) = await _cosmosQueryEngine.QueryItemsAsync<T>(query, databaseName, containerName, populateIndexMetrics);
+        var (results, requestCharge) = await _cosmosQueryEngine.QueryItemsAsync<T>(query, parameters, databaseName, containerName, populateIndexMetrics);
 
         Console.WriteLine($"Total request charge {queryName}: {requestCharge}");
 
@@ -29,7 +29,6 @@ public class CosmosQueryMetrics
 
         return results;
     }
-
     public async Task<T> QuerySingleValueWithMetricsAsync<T>(
         string query, string databaseName, string containerName, string queryName, bool populateIndexMetrics = false)
     {
@@ -66,5 +65,5 @@ public class CosmosQueryMetrics
         Console.WriteLine($"Total time {queryName}: {elapsedTimeInMilliseconds} milliseconds");
 
         return (result);
-    }    
+    }
 }
