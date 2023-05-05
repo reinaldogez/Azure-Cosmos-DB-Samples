@@ -14,13 +14,13 @@ public class CosmosQueryEngine
 
     public async Task<(List<T> Results, double RequestCharge)> QueryItemsAsync<T>(
         string queryString,
-        Dictionary<string, object> parameters,
         string databaseName,
         string containerName,
+        Dictionary<string, object> parameters = null,
         bool populateIndexMetrics = false)
     {
         var container = _cosmosClient.GetContainer(databaseName, containerName);
-        var queryDefinition = new QueryDefinition(queryString);
+        QueryDefinition queryDefinition = new QueryDefinition(queryString);
 
         // Add the parameters to the query definition
         if (parameters != null)
@@ -60,16 +60,30 @@ public class CosmosQueryEngine
 
         return (results, totalRequestCharge);
     }
-    
+
     public async Task<(T Value, double RequestCharge, string ErrorMessage)> QuerySingleValueAsync<T>(
-        string queryString, string databaseName, string containerName, bool populateIndexMetrics = false)
+        string queryString,
+        string databaseName,
+        string containerName,
+        Dictionary<string, object> parameters = null,
+        bool populateIndexMetrics = false)
     {
         try
         {
             Container container = _cosmosClient.GetContainer(databaseName, containerName);
 
+            QueryDefinition queryDefinition = new QueryDefinition(queryString);
+
+            if (parameters != null)
+            {
+                foreach (var parameter in parameters)
+                {
+                    queryDefinition.WithParameter(parameter.Key, parameter.Value);
+                }
+            }
+
             var query = container.GetItemQueryIterator<T>(
-                new QueryDefinition(queryString), requestOptions: new QueryRequestOptions
+                queryDefinition, requestOptions: new QueryRequestOptions
                 {
                     PopulateIndexMetrics = populateIndexMetrics,
                     MaxItemCount = 1,

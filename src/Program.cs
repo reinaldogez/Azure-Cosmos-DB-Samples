@@ -106,6 +106,7 @@ void PrintPrompt()
     Console.WriteLine("2 - Scenario 2: Compare perfomance between PostByAuthor and Post containers");
     Console.WriteLine("3 - Scenario 3: Compare perfomance between PostByAuthor, Post, and PostByLikes containers queried by number of likes");
     Console.WriteLine("4 - Scenario 4: Compare perfomance between PostByAuthor and Post containers queried by id");
+    Console.WriteLine();
 }
 
 async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
@@ -113,6 +114,8 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
     await QueryNumberOfRowsInContainers();
 
     Console.ForegroundColor = ConsoleColor.Green;
+    Console.WriteLine("Starting ComparePerformanceBetweenPostByAuthorAndPostContainers");
+
     List<CosmosPostEntity> QueryDefaultPostByAuthorResponse =
         await _cosmosQueryMetrics.QueryItemsWithMetricsAsync<CosmosPostEntity>(
             query: $"SELECT * FROM c WHERE c.Author = '@authorName'",
@@ -142,7 +145,7 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
             parameters: new Dictionary<string, object>
             {
             { "@authorName", "Christa Howell" }
-            },            
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "Post",
             queryName: "Query container Post(Author exists in database)"
@@ -157,7 +160,7 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
             parameters: new Dictionary<string, object>
             {
             { "@authorName", "x" }
-            },            
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query container PostByAuthor(First query in PostByAuthor container, Author doesn't exist in database)"
@@ -169,7 +172,7 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
             parameters: new Dictionary<string, object>
             {
             { "@authorName", "y" }
-            },  
+            },
             databaseName: cosmosDbSettings.DatabaseName,
             containerName: "PostByAuthor",
             queryName: "Query container PostByAuthor(Author doesn't exist in database)"
@@ -196,12 +199,17 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorAndPostContainers()
 
 async Task<bool> ComparePerfomanceBetweenPostByAuthorAndPostContainerQueriedById(string id)
 {
-    Console.WriteLine("Starting ComparePerfomanceBetweenPostByAuthorAndPostContainerQueriedById");
     Console.ForegroundColor = ConsoleColor.DarkCyan;
+    Console.WriteLine("Starting ComparePerfomanceBetweenPostByAuthorAndPostContainerQueriedById");
     Console.WriteLine($"Id: {id}");
+
     CosmosPostEntity PostInInPostByAuthorContainer =
     await _cosmosQueryMetrics.QuerySingleValueWithMetricsAsync<CosmosPostEntity>(
-        query: $"SELECT * FROM c WHERE c.id = '{id}'",
+        query: $"SELECT * FROM c WHERE c.id = '@id'",
+        parameters: new Dictionary<string, object>
+        {
+        { "@id", id }
+        },
         databaseName: cosmosDbSettings.DatabaseName,
         containerName: "PostByAuthor",
         queryName: "Query by id in PostByAuthor container",
@@ -271,6 +279,9 @@ async Task<bool> ComparePerformanceBetweenPostByAuthorPostByLikesAndPostContaine
 
 async Task<bool> QueryNumberOfRowsInContainers()
 {
+    Console.WriteLine();
+    Console.WriteLine("Starting QueryNumberOfRowsInContainers");
+    Console.ForegroundColor = ConsoleColor.DarkBlue;
     long numberOfRowsInPostByAuthorContainer = await _cosmosQueryMetrics.QuerySingleValueWithMetricsAsync<long>(
         query: "SELECT VALUE COUNT(1) FROM c",
         cosmosDbSettings.DatabaseName,
@@ -294,6 +305,9 @@ async Task<bool> QueryNumberOfRowsInContainers()
         queryName: "Query number of rows in PostByLikes container"
     );
     Console.WriteLine($"Number of rows in Post container {string.Format("{0:N0}", numberOfRowsInPostByLikesContainer)}");
+
+    Console.ResetColor();
+    Console.WriteLine();
     return true;
 }
 
