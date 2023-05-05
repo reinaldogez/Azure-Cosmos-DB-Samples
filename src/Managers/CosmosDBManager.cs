@@ -87,24 +87,6 @@ public class CosmosDBManager
         return false;
     }
 
-    private static void ListProperties(object obj)
-    {
-        if (obj == null) return;
-
-        var type = obj.GetType();
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-        foreach (var property in properties)
-        {
-            Console.WriteLine($"{property.Name}: {property.GetValue(obj)}");
-
-            if (property.PropertyType.IsClass && property.PropertyType != typeof(string))
-            {
-                ListProperties(property.GetValue(obj));
-            }
-        }
-    }
-
     public async Task<bool> CheckDatabaseExists(string databaseName)
     {
         Console.WriteLine("Checking database...\n");
