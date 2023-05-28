@@ -18,6 +18,7 @@ services.AddSingleton<IConfiguration>(configuration);
 
 var cosmosDbSettings = new CosmosDbSettings();
 configuration.Bind("CosmosDbSettings", cosmosDbSettings);
+cosmosDbSettings.PrimaryKey = Environment.GetEnvironmentVariable("CosmosDbSettings__PrimaryKey", EnvironmentVariableTarget.User);
 
 CosmosClientOptions cosmosClientOptions = new CosmosClientOptions
 {

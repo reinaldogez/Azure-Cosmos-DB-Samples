@@ -1,10 +1,19 @@
 # Azure Cosmos DB Samples
 
+This project contains code examples for using Azure Cosmos DB. The examples are designed to be easy to get started with using Azure Cosmos DB, and to make faster and more cost-efficient queries. It also includes performance evaluations of different container creation approaches, aiding developers in optimizing their application's performance.
+
 ## Installation
 
 The project includes a Docker Compose file that allows you to run the Azure Cosmos Emulator within a Docker container. However, if your machine has limited memory and CPU resources, it is advisable to install the emulator directly on your operating system to achieve optimal performance. Running the emulator natively on your machine can help minimize resource consumption and provide a smoother experience when working with the emulator.
 
 [**Install and use the Azure Cosmos DB Emulator for local development and testing**](https://learn.microsoft.com/en-us/azure/cosmos-db/local-emulator?tabs=ssl-netstd21)
+
+### Set Azure Cosmos DB Emulator Primary Key as Environment Variable
+
+Open a powershell terminal in as Administrator and run the following command:
+```ps1
+setx CosmosDbSettings__PrimaryKey "your primary key"
+```
 
 ## Cosmos Concepts
 

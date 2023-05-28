@@ -6,17 +6,13 @@ namespace AzureCosmosDBSamples.Managers;
 
 public static class DatabaseSeeder
 {
-    public static void Seed(IServiceProvider serviceProvider)
-    {
-
-    }
 
     public static List<CosmosPostEntity> SeedPostByAuthorContainer()
     {
 
         try
         {
-            int numberOfAuthors = 100000;
+            int numberOfAuthors = 10_000;
             int minPostsPerAuthor = 2;
             int maxPostsPerAuthor = 20;
 
@@ -47,7 +43,6 @@ public static class DatabaseSeeder
                 var authorPosts = postFaker.Clone().RuleFor(u => u.Author, (f, u) => author).Generate(numberOfPosts);
                 posts.AddRange(authorPosts);
             }
-
             return posts;
         }
         catch (Exception ex)
